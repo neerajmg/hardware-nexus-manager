@@ -11,22 +11,23 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Package, CalendarIcon, ArrowLeft, Save } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
-import { useToast } from "@/hooks/use-toast";
-import { hardwareTypes, employees } from "@/data/mockData";
+import { useCreateHardware } from "@/hooks/useHardware";
+
+const hardwareTypes = ["Laptop", "Monitor", "Mouse", "Keyboard", "Headset", "Webcam", "Tablet", "Dock", "Cable"];
+const employees = ["John Doe", "Jane Smith", "Mike Johnson", "Sarah Wilson", "David Brown"];
 
 const AddHardware = () => {
   const navigate = useNavigate();
-  const { toast } = useToast();
+  const createHardware = useCreateHardware();
   
   const [formData, setFormData] = useState({
     name: "",
     type: "",
-    serialNumber: "",
-    assignedTo: "",
+    serial_number: "",
+    assigned_to: "",
     status: "Available"
   });
   const [purchaseDate, setPurchaseDate] = useState<Date>();
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({
@@ -39,42 +40,27 @@ const AddHardware = () => {
     e.preventDefault();
     
     // Validation
-    if (!formData.name || !formData.type || !formData.serialNumber) {
-      toast({
-        title: "Validation Error",
-        description: "Please fill in all required fields.",
-        variant: "destructive"
-      });
+    if (!formData.name || !formData.type || !formData.serial_number) {
       return;
     }
 
-    setIsSubmitting(true);
+    const hardwareData = {
+      ...formData,
+      assigned_to: formData.assigned_to || null,
+      purchase_date: purchaseDate ? format(purchaseDate, "yyyy-MM-dd") : null
+    };
 
-    // Simulate API call
-    try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      toast({
-        title: "Success!",
-        description: "Hardware item has been added to inventory.",
-      });
-      
-      navigate("/inventory");
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to add hardware item. Please try again.",
-        variant: "destructive"
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
+    createHardware.mutate(hardwareData, {
+      onSuccess: () => {
+        navigate("/inventory");
+      }
+    });
   };
 
   // Update status based on assignment
   const handleAssignmentChange = (value: string) => {
     const assignedTo = value === "unassigned" ? "" : value;
-    handleInputChange("assignedTo", assignedTo);
+    handleInputChange("assigned_to", assignedTo);
     handleInputChange("status", assignedTo ? "Assigned" : "Available");
   };
 
@@ -157,8 +143,8 @@ const AddHardware = () => {
                   <Input
                     id="serialNumber"
                     placeholder="e.g., MBP2023001"
-                    value={formData.serialNumber}
-                    onChange={(e) => handleInputChange("serialNumber", e.target.value)}
+                    value={formData.serial_number}
+                    onChange={(e) => handleInputChange("serial_number", e.target.value)}
                     className="font-mono"
                     required
                   />
@@ -195,7 +181,7 @@ const AddHardware = () => {
                 {/* Assigned To */}
                 <div className="space-y-2">
                   <Label htmlFor="assignedTo">Assign To Employee (Optional)</Label>
-                  <Select value={formData.assignedTo || "unassigned"} onValueChange={handleAssignmentChange}>
+                  <Select value={formData.assigned_to || "unassigned"} onValueChange={handleAssignmentChange}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select employee or leave unassigned" />
                     </SelectTrigger>
@@ -231,10 +217,10 @@ const AddHardware = () => {
                 <Button 
                   type="submit" 
                   className="flex-1" 
-                  disabled={isSubmitting}
+                  disabled={createHardware.isPending}
                 >
                   <Save className="h-4 w-4 mr-2" />
-                  {isSubmitting ? "Adding..." : "Add Hardware"}
+                  {createHardware.isPending ? "Adding..." : "Add Hardware"}
                 </Button>
                 <Link to="/inventory" className="flex-1">
                   <Button type="button" variant="outline" className="w-full">

@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -7,8 +8,9 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Search, Filter, Plus, Edit, Eye, Archive, Package } from "lucide-react";
-import { mockInventory, hardwareTypes } from "@/data/mockData";
+import { useHardwareItems, useDeleteHardware } from "@/hooks/useHardware";
 
+const hardwareTypes = ["Laptop", "Monitor", "Mouse", "Keyboard", "Headset", "Webcam", "Tablet", "Dock", "Cable"];
 const statusTypes = ["All Status", "Available", "Assigned", "Retired"];
 
 const getStatusBadge = (status: string) => {
@@ -28,14 +30,16 @@ const Inventory = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [typeFilter, setTypeFilter] = useState("All Types");
   const [statusFilter, setStatusFilter] = useState("All Status");
-  const [inventory, setInventory] = useState(mockInventory);
+  
+  const { data: inventory = [], isLoading, error } = useHardwareItems();
+  const deleteHardware = useDeleteHardware();
 
   const filteredInventory = inventory.filter(item => {
     const matchesSearch = 
       item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       item.type.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.serialNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.assignedTo.toLowerCase().includes(searchTerm.toLowerCase());
+      item.serial_number.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (item.assigned_to && item.assigned_to.toLowerCase().includes(searchTerm.toLowerCase()));
     
     const matchesType = typeFilter === "All Types" || item.type === typeFilter;
     const matchesStatus = statusFilter === "All Status" || item.status === statusFilter;
@@ -44,6 +48,34 @@ const Inventory = () => {
   });
 
   const allHardwareTypes = ["All Types", ...hardwareTypes];
+
+  const handleRetire = (item: any) => {
+    if (window.confirm(`Are you sure you want to retire ${item.name}?`)) {
+      deleteHardware.mutate(item.id);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex items-center justify-center">
+        <div className="text-center">
+          <Package className="h-12 w-12 text-gray-400 mx-auto mb-4 animate-pulse" />
+          <p className="text-gray-600">Loading inventory...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex items-center justify-center">
+        <div className="text-center">
+          <Package className="h-12 w-12 text-red-400 mx-auto mb-4" />
+          <p className="text-red-600">Error loading inventory. Please try again.</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
@@ -156,8 +188,8 @@ const Inventory = () => {
                   <TableRow key={item.id} className="hover:bg-gray-50">
                     <TableCell className="font-medium">{item.name}</TableCell>
                     <TableCell>{item.type}</TableCell>
-                    <TableCell className="font-mono text-sm">{item.serialNumber}</TableCell>
-                    <TableCell>{item.assignedTo || <span className="text-gray-400">Unassigned</span>}</TableCell>
+                    <TableCell className="font-mono text-sm">{item.serial_number}</TableCell>
+                    <TableCell>{item.assigned_to || <span className="text-gray-400">Unassigned</span>}</TableCell>
                     <TableCell>{getStatusBadge(item.status)}</TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end space-x-2">
@@ -172,7 +204,13 @@ const Inventory = () => {
                           </Button>
                         </Link>
                         {item.status !== "Retired" && (
-                          <Button variant="ghost" size="sm" className="text-red-600 hover:text-red-700">
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            className="text-red-600 hover:text-red-700"
+                            onClick={() => handleRetire(item)}
+                            disabled={deleteHardware.isPending}
+                          >
                             <Archive className="h-4 w-4" />
                           </Button>
                         )}
@@ -185,11 +223,19 @@ const Inventory = () => {
           </CardContent>
         </Card>
 
-        {filteredInventory.length === 0 && (
+        {filteredInventory.length === 0 && inventory.length > 0 && (
           <div className="text-center py-12">
             <Package className="h-12 w-12 text-gray-400 mx-auto mb-4" />
             <h3 className="text-lg font-medium text-gray-900 mb-2">No items found</h3>
             <p className="text-gray-500 mb-4">Try adjusting your search or filter criteria</p>
+          </div>
+        )}
+
+        {inventory.length === 0 && (
+          <div className="text-center py-12">
+            <Package className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-gray-900 mb-2">No hardware items yet</h3>
+            <p className="text-gray-500 mb-4">Get started by adding your first hardware item</p>
             <Link to="/add-hardware">
               <Button>
                 <Plus className="h-4 w-4 mr-2" />

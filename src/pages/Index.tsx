@@ -1,21 +1,14 @@
+
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Package, Plus, Phone, Users, TrendingUp } from "lucide-react";
-
-// Mock data for demonstration
-const mockStats = {
-  totalItems: 247,
-  assignedItems: 189,
-  availableItems: 45,
-  retiredItems: 13,
-  recentlyAdded: 8
-};
+import { useHardwareStats } from "@/hooks/useHardware";
 
 const Index = () => {
-  const [stats, setStats] = useState(mockStats);
+  const stats = useHardwareStats();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
