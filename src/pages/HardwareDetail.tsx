@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -48,7 +47,7 @@ const mockHardware: Record<string, HardwareItem> = {
   }
 };
 
-const employees = ["", "John Doe", "Jane Smith", "Mike Johnson", "Sarah Wilson", "David Brown"];
+const employees = ["John Doe", "Jane Smith", "Mike Johnson", "Sarah Wilson", "David Brown"];
 
 const getStatusBadge = (status: string) => {
   switch (status) {
@@ -304,7 +303,7 @@ const HardwareDetail = () => {
                                 <SelectValue placeholder="Select employee" />
                               </SelectTrigger>
                               <SelectContent>
-                                {employees.filter(emp => emp).map((employee) => (
+                                {employees.map((employee) => (
                                   <SelectItem key={employee} value={employee}>
                                     {employee}
                                   </SelectItem>

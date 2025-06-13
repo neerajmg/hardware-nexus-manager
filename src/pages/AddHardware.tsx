@@ -14,7 +14,7 @@ import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 
 const hardwareTypes = ["Laptop", "Monitor", "Mouse", "Keyboard", "Headset", "Webcam", "Tablet", "Dock", "Cable"];
-const employees = ["", "John Doe", "Jane Smith", "Mike Johnson", "Sarah Wilson", "David Brown"];
+const employees = ["John Doe", "Jane Smith", "Mike Johnson", "Sarah Wilson", "David Brown"];
 
 const AddHardware = () => {
   const navigate = useNavigate();
@@ -75,8 +75,9 @@ const AddHardware = () => {
 
   // Update status based on assignment
   const handleAssignmentChange = (value: string) => {
-    handleInputChange("assignedTo", value);
-    handleInputChange("status", value ? "Assigned" : "Available");
+    const assignedTo = value === "unassigned" ? "" : value;
+    handleInputChange("assignedTo", assignedTo);
+    handleInputChange("status", assignedTo ? "Assigned" : "Available");
   };
 
   return (
@@ -196,14 +197,15 @@ const AddHardware = () => {
                 {/* Assigned To */}
                 <div className="space-y-2">
                   <Label htmlFor="assignedTo">Assign To Employee (Optional)</Label>
-                  <Select value={formData.assignedTo} onValueChange={handleAssignmentChange}>
+                  <Select value={formData.assignedTo || "unassigned"} onValueChange={handleAssignmentChange}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select employee or leave unassigned" />
                     </SelectTrigger>
                     <SelectContent>
+                      <SelectItem value="unassigned">Unassigned</SelectItem>
                       {employees.map((employee) => (
-                        <SelectItem key={employee || "unassigned"} value={employee}>
-                          {employee || "Unassigned"}
+                        <SelectItem key={employee} value={employee}>
+                          {employee}
                         </SelectItem>
                       ))}
                     </SelectContent>
