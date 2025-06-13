@@ -10,9 +10,21 @@ import { Package, ArrowLeft, Edit, Archive, UserPlus, Calendar, Monitor } from "
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 
+interface HardwareItem {
+  id: number;
+  name: string;
+  type: string;
+  serialNumber: string;
+  assignedTo: string;
+  status: string;
+  purchaseDate: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 // Mock data - in a real app, this would come from an API
-const mockHardware = {
-  1: {
+const mockHardware: Record<string, HardwareItem> = {
+  "1": {
     id: 1,
     name: "MacBook Pro 14\"",
     type: "Laptop",
@@ -23,7 +35,7 @@ const mockHardware = {
     createdAt: "2023-10-15T10:30:00Z",
     updatedAt: "2023-11-01T14:20:00Z"
   },
-  2: {
+  "2": {
     id: 2,
     name: "Dell UltraSharp 27\"",
     type: "Monitor",
@@ -52,34 +64,33 @@ const getStatusBadge = (status: string) => {
 };
 
 const HardwareDetail = () => {
-  const { id } = useParams();
+  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
   
-  const [hardware, setHardware] = useState<any>(null);
+  const [hardware, setHardware] = useState<HardwareItem | null>(null);
   const [isAssignDialogOpen, setIsAssignDialogOpen] = useState(false);
   const [isRetireDialogOpen, setIsRetireDialogOpen] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState("");
 
   useEffect(() => {
     // In a real app, fetch hardware details from API
-    const hardwareData = mockHardware[id as keyof typeof mockHardware];
-    setHardware(hardwareData);
-    
-    if (!hardwareData) {
+    if (id && mockHardware[id]) {
+      setHardware(mockHardware[id]);
+    } else {
       navigate("/inventory");
     }
   }, [id, navigate]);
 
   const handleAssignment = () => {
-    if (!selectedEmployee) return;
+    if (!selectedEmployee || !hardware) return;
     
-    setHardware(prev => ({
+    setHardware(prev => prev ? ({
       ...prev,
       assignedTo: selectedEmployee,
       status: "Assigned",
       updatedAt: new Date().toISOString()
-    }));
+    }) : null);
     
     setIsAssignDialogOpen(false);
     setSelectedEmployee("");
@@ -91,12 +102,14 @@ const HardwareDetail = () => {
   };
 
   const handleUnassignment = () => {
-    setHardware(prev => ({
+    if (!hardware) return;
+    
+    setHardware(prev => prev ? ({
       ...prev,
       assignedTo: "",
       status: "Available",
       updatedAt: new Date().toISOString()
-    }));
+    }) : null);
     
     toast({
       title: "Hardware Unassigned",
@@ -105,12 +118,14 @@ const HardwareDetail = () => {
   };
 
   const handleRetire = () => {
-    setHardware(prev => ({
+    if (!hardware) return;
+    
+    setHardware(prev => prev ? ({
       ...prev,
       status: "Retired",
       assignedTo: "",
       updatedAt: new Date().toISOString()
-    }));
+    }) : null);
     
     setIsRetireDialogOpen(false);
     
