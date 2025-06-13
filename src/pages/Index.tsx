@@ -1,10 +1,9 @@
-
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Package, Plus, Monitor, Users, TrendingUp } from "lucide-react";
+import { Package, Plus, Phone, Users, TrendingUp } from "lucide-react";
 
 // Mock data for demonstration
 const mockStats = {
@@ -136,7 +135,7 @@ const Index = () => {
               <Link to="/inventory" className="group">
                 <div className="p-4 border border-gray-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition-all">
                   <div className="flex items-center space-x-3">
-                    <Monitor className="h-8 w-8 text-blue-600" />
+                    <Phone className="h-8 w-8 text-blue-600" />
                     <div>
                       <h3 className="font-medium text-gray-900">Browse Inventory</h3>
                       <p className="text-sm text-gray-500">Search and filter all hardware</p>
