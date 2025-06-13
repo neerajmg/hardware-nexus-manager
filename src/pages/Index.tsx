@@ -57,7 +57,7 @@ const Index = () => {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link to="/inventory">
               <Button size="lg" className="bg-blue-600 hover:bg-blue-700">
-                <Monitor className="h-5 w-5 mr-2" />
+                <Phone className="h-5 w-5 mr-2" />
                 View Inventory
               </Button>
             </Link>
