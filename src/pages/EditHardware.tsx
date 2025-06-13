@@ -1,6 +1,6 @@
 
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,9 +12,34 @@ import { Package, CalendarIcon, ArrowLeft, Save } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
-import { hardwareTypes, employees } from "@/data/mockData";
 
-const AddHardware = () => {
+const hardwareTypes = ["Laptop", "Monitor", "Mouse", "Keyboard", "Headset", "Webcam", "Tablet", "Dock", "Cable"];
+const employees = ["John Doe", "Jane Smith", "Mike Johnson", "Sarah Wilson", "David Brown"];
+
+// Mock data - same as in HardwareDetail
+const mockHardware: Record<string, any> = {
+  "1": {
+    id: 1,
+    name: "MacBook Pro 14\"",
+    type: "Laptop",
+    serialNumber: "MBP2023001",
+    assignedTo: "John Doe",
+    status: "Assigned",
+    purchaseDate: "2023-10-15"
+  },
+  "2": {
+    id: 2,
+    name: "Dell UltraSharp 27\"",
+    type: "Monitor",
+    serialNumber: "DU27001",
+    assignedTo: "",
+    status: "Available",
+    purchaseDate: "2023-09-20"
+  }
+};
+
+const EditHardware = () => {
+  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
   
@@ -28,6 +53,24 @@ const AddHardware = () => {
   const [purchaseDate, setPurchaseDate] = useState<Date>();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  useEffect(() => {
+    if (id && mockHardware[id]) {
+      const hardware = mockHardware[id];
+      setFormData({
+        name: hardware.name,
+        type: hardware.type,
+        serialNumber: hardware.serialNumber,
+        assignedTo: hardware.assignedTo,
+        status: hardware.status
+      });
+      if (hardware.purchaseDate) {
+        setPurchaseDate(new Date(hardware.purchaseDate));
+      }
+    } else {
+      navigate("/inventory");
+    }
+  }, [id, navigate]);
+
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({
       ...prev,
@@ -38,7 +81,6 @@ const AddHardware = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Validation
     if (!formData.name || !formData.type || !formData.serialNumber) {
       toast({
         title: "Validation Error",
@@ -50,20 +92,19 @@ const AddHardware = () => {
 
     setIsSubmitting(true);
 
-    // Simulate API call
     try {
       await new Promise(resolve => setTimeout(resolve, 1000));
       
       toast({
         title: "Success!",
-        description: "Hardware item has been added to inventory.",
+        description: "Hardware item has been updated.",
       });
       
-      navigate("/inventory");
+      navigate(`/hardware/${id}`);
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to add hardware item. Please try again.",
+        description: "Failed to update hardware item. Please try again.",
         variant: "destructive"
       });
     } finally {
@@ -71,7 +112,6 @@ const AddHardware = () => {
     }
   };
 
-  // Update status based on assignment
   const handleAssignmentChange = (value: string) => {
     const assignedTo = value === "unassigned" ? "" : value;
     handleInputChange("assignedTo", assignedTo);
@@ -107,12 +147,12 @@ const AddHardware = () => {
       {/* Main Content */}
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
-          <Link to="/inventory" className="inline-flex items-center text-blue-600 hover:text-blue-700 mb-4">
+          <Link to={`/hardware/${id}`} className="inline-flex items-center text-blue-600 hover:text-blue-700 mb-4">
             <ArrowLeft className="h-4 w-4 mr-1" />
-            Back to Inventory
+            Back to Hardware Detail
           </Link>
-          <h2 className="text-3xl font-bold text-gray-900 mb-2">Add New Hardware</h2>
-          <p className="text-gray-600">Register a new hardware item in your inventory</p>
+          <h2 className="text-3xl font-bold text-gray-900 mb-2">Edit Hardware</h2>
+          <p className="text-gray-600">Update hardware information</p>
         </div>
 
         <Card>
@@ -234,9 +274,9 @@ const AddHardware = () => {
                   disabled={isSubmitting}
                 >
                   <Save className="h-4 w-4 mr-2" />
-                  {isSubmitting ? "Adding..." : "Add Hardware"}
+                  {isSubmitting ? "Updating..." : "Update Hardware"}
                 </Button>
-                <Link to="/inventory" className="flex-1">
+                <Link to={`/hardware/${id}`} className="flex-1">
                   <Button type="button" variant="outline" className="w-full">
                     Cancel
                   </Button>
@@ -245,20 +285,9 @@ const AddHardware = () => {
             </form>
           </CardContent>
         </Card>
-
-        {/* Help Text */}
-        <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-          <h4 className="font-medium text-blue-900 mb-2">Tips for adding hardware:</h4>
-          <ul className="text-sm text-blue-800 space-y-1">
-            <li>• Use descriptive names that include brand and model</li>
-            <li>• Serial numbers should be unique and easily identifiable</li>
-            <li>• If assigning to an employee, status will automatically change to "Assigned"</li>
-            <li>• Purchase date helps track warranty and depreciation</li>
-          </ul>
-        </div>
       </main>
     </div>
   );
 };
 
-export default AddHardware;
+export default EditHardware;

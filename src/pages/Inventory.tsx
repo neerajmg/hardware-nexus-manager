@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -8,57 +7,8 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Search, Filter, Plus, Edit, Eye, Archive, Package } from "lucide-react";
+import { mockInventory, hardwareTypes } from "@/data/mockData";
 
-// Mock data
-const mockInventory = [
-  {
-    id: 1,
-    name: "MacBook Pro 14\"",
-    type: "Laptop",
-    serialNumber: "MBP2023001",
-    assignedTo: "John Doe",
-    status: "Assigned",
-    purchaseDate: "2023-10-15"
-  },
-  {
-    id: 2,
-    name: "Dell UltraSharp 27\"",
-    type: "Monitor",
-    serialNumber: "DU27001",
-    assignedTo: "",
-    status: "Available",
-    purchaseDate: "2023-09-20"
-  },
-  {
-    id: 3,
-    name: "Logitech MX Master 3",
-    type: "Mouse",
-    serialNumber: "LMX3001",
-    assignedTo: "Jane Smith",
-    status: "Assigned",
-    purchaseDate: "2023-08-10"
-  },
-  {
-    id: 4,
-    name: "HP EliteBook 840",
-    type: "Laptop",
-    serialNumber: "HPE840002",
-    assignedTo: "",
-    status: "Retired",
-    purchaseDate: "2021-05-15"
-  },
-  {
-    id: 5,
-    name: "Samsung 32\" Curved",
-    type: "Monitor",
-    serialNumber: "SAM32C001",
-    assignedTo: "Mike Johnson",
-    status: "Assigned",
-    purchaseDate: "2023-11-01"
-  }
-];
-
-const hardwareTypes = ["All Types", "Laptop", "Monitor", "Mouse", "Keyboard", "Headset", "Webcam"];
 const statusTypes = ["All Status", "Available", "Assigned", "Retired"];
 
 const getStatusBadge = (status: string) => {
@@ -92,6 +42,8 @@ const Inventory = () => {
     
     return matchesSearch && matchesType && matchesStatus;
   });
+
+  const allHardwareTypes = ["All Types", ...hardwareTypes];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
@@ -155,7 +107,7 @@ const Inventory = () => {
                   <SelectValue placeholder="Hardware Type" />
                 </SelectTrigger>
                 <SelectContent>
-                  {hardwareTypes.map((type) => (
+                  {allHardwareTypes.map((type) => (
                     <SelectItem key={type} value={type}>
                       {type}
                     </SelectItem>

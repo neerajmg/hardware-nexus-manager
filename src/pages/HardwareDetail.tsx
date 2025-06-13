@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -8,46 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Package, ArrowLeft, Edit, Archive, UserPlus, Calendar, Monitor } from "lucide-react";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
-
-interface HardwareItem {
-  id: number;
-  name: string;
-  type: string;
-  serialNumber: string;
-  assignedTo: string;
-  status: string;
-  purchaseDate: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-// Mock data - in a real app, this would come from an API
-const mockHardware: Record<string, HardwareItem> = {
-  "1": {
-    id: 1,
-    name: "MacBook Pro 14\"",
-    type: "Laptop",
-    serialNumber: "MBP2023001",
-    assignedTo: "John Doe",
-    status: "Assigned",
-    purchaseDate: "2023-10-15",
-    createdAt: "2023-10-15T10:30:00Z",
-    updatedAt: "2023-11-01T14:20:00Z"
-  },
-  "2": {
-    id: 2,
-    name: "Dell UltraSharp 27\"",
-    type: "Monitor",
-    serialNumber: "DU27001",
-    assignedTo: "",
-    status: "Available",
-    purchaseDate: "2023-09-20",
-    createdAt: "2023-09-20T09:15:00Z",
-    updatedAt: "2023-09-20T09:15:00Z"
-  }
-};
-
-const employees = ["John Doe", "Jane Smith", "Mike Johnson", "Sarah Wilson", "David Brown"];
+import { getHardwareById, employees, HardwareItem } from "@/data/mockData";
 
 const getStatusBadge = (status: string) => {
   switch (status) {
@@ -73,9 +35,13 @@ const HardwareDetail = () => {
   const [selectedEmployee, setSelectedEmployee] = useState("");
 
   useEffect(() => {
-    // In a real app, fetch hardware details from API
-    if (id && mockHardware[id]) {
-      setHardware(mockHardware[id]);
+    if (id) {
+      const hardwareItem = getHardwareById(id);
+      if (hardwareItem) {
+        setHardware(hardwareItem);
+      } else {
+        navigate("/inventory");
+      }
     } else {
       navigate("/inventory");
     }
